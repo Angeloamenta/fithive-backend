@@ -4,7 +4,7 @@ const ExerciseSchema = new mongoose.Schema({
     name: {type:String, required:true},
     repset:{type:String, required:true},
     rec:{type: String},
-    notes:{type:String, required:true}
+    notes:{type:String}
 })
 
 const DaySchema = new mongoose.Schema({
