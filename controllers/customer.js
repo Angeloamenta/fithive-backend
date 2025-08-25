@@ -141,55 +141,43 @@ export const deletePlan = async (req, res) => {
   try {
     const { userId, planId } = req.params;
     const customer = await Customer.findById(userId);
+
     if (!customer) {
       return res.status(404).json({ message: "utente non trovato" });
     }
 
-    const workoutPlan = customer.workoutPlans.id(planId);
-
-    if (!workoutPlan) {
-      return res.status(404).json({ message: "scheda non trovata" });
-    }
-
-    workoutPlan.remove();
+    // elimina la scheda dal subdocumento
+    customer.workoutPlans.pull({ _id: planId });
 
     await customer.save();
 
     res.status(200).json({ message: "allenamento eliminato con successo" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
 
+
 export const deleteDay = async (req, res) => {
   try {
     const { userId, planId, dayId } = req.params;
-    const customer = await Customer.findById(userId);
-    if (!customer) {
-      return res.status(404).json({ message: "utente non trovato" });
-    }
 
-    const workoutPlan = customer.workoutPlans.id(planId);
+    const updated = await Customer.updateOne(
+      { _id: userId, "workoutPlans._id": planId },
+      { $pull: { "workoutPlans.$.days": { _id: dayId } } }
+    );
 
-    if (!workoutPlan) {
-      return res.status(404).json({ message: "scheda non trovata" });
-    }
-
-    const day = workoutPlan.days.id(dayId);
-
-    if (!day) {
+    if (updated.modifiedCount === 0) {
       return res.status(404).json({ message: "giorno non trovato" });
     }
-
-    day.remove();
-
-    await customer.save();
 
     res.status(200).json({ message: "giorno eliminato con successo" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const deleteExercise = async (req, res) => {
   try {
