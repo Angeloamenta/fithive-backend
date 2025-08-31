@@ -37,7 +37,7 @@ router.delete('/:userId/workout/:planId/day/:dayId/exercise/:exerciseId',authent
 router.patch('/:customerId',authenticateToken,  editCustomer)
 router.patch('/:customerId/workout/:planId',authenticateToken, editPlan)
 router.patch('/:customerId/workout/:planId/day/:dayId',authenticateToken, editDay)
-router.patch('/:customerId/workout/:planId/day/:dayId/exercise/;exerciseId',authenticateToken, editExercise)
+router.patch('/:customerId/workout/:planId/day/:dayId/exercise/:exerciseId', authenticateToken, editExercise)
 
 
 
