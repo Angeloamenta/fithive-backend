@@ -3,17 +3,27 @@ import mongoose from "mongoose";
 
 // ---------------------- CREATE ----------------------
 
+export const addCustomer = async (req, res) => {
+  try {
+    const customer = new Customer(req.body);
+    await customer.save();
+    res.status(201).json(customer);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 export const addWorkout = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name = "Nuovo Piano di Allenamento" } = req.body; // Nome di default se non specificato
+    const { name = "Nuovo Piano di Allenamento" } = req.body;
 
     const customer = await Customer.findById(id);
     if (!customer) {
       return res.status(404).json({ error: "Cliente non trovato" });
     }
 
-    // Crea il workout plan con nome e struttura base
+    // Crea il workout plan con struttura corretta
     const newWorkoutPlan = {
       name,
       days: [],
@@ -26,7 +36,10 @@ export const addWorkout = async (req, res) => {
     // Prendi l'ultimo workout aggiunto (quello appena creato)
     const createdWorkout = customer.workoutPlans[customer.workoutPlans.length - 1];
 
-    res.status(201).json(createdWorkout); // Ritorna l'oggetto completo con _id
+    res.status(201).json({
+      message: "Scheda aggiunta con successo",
+      workoutPlan: createdWorkout, // Ritorna l'oggetto completo con _id
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -55,7 +68,10 @@ export const addDay = async (req, res) => {
     // Prendi l'ultimo giorno aggiunto (quello appena creato)
     const createdDay = workoutPlan.days[workoutPlan.days.length - 1];
 
-    res.status(200).json(createdDay); // Ritorna il day con _id
+    res.status(200).json({
+      message: "Giorno aggiunto con successo",
+      day: createdDay // Ritorna il day con _id
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -88,7 +104,10 @@ export const addExercise = async (req, res) => {
     // Prendi l'ultimo esercizio aggiunto (quello appena creato)
     const createdExercise = workoutDay.exercises[workoutDay.exercises.length - 1];
 
-    res.status(201).json(createdExercise); // Ritorna l'esercizio con _id
+    res.status(201).json({
+      message: "Esercizio aggiunto con successo",
+      exercise: createdExercise, // Ritorna l'esercizio con _id
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
