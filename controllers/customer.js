@@ -3,33 +3,30 @@ import mongoose from "mongoose";
 
 // ---------------------- CREATE ----------------------
 
-export const addCustomer = async (req, res) => {
-  try {
-    const customer = new Customer(req.body);
-    await customer.save();
-    res.status(201).json(customer);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
 export const addWorkout = async (req, res) => {
   try {
     const { id } = req.params;
-    const workoutPlan = req.body;
+    const { name = "Nuovo Piano di Allenamento" } = req.body; // Nome di default se non specificato
 
     const customer = await Customer.findById(id);
     if (!customer) {
       return res.status(404).json({ error: "Cliente non trovato" });
     }
 
-    customer.workoutPlans.push(workoutPlan);
+    // Crea il workout plan con nome e struttura base
+    const newWorkoutPlan = {
+      name,
+      days: [],
+      createdAt: new Date()
+    };
+
+    customer.workoutPlans.push(newWorkoutPlan);
     await customer.save();
 
-    res.status(201).json({
-      message: "Scheda aggiunta con successo",
-      workoutPlan,
-    });
+    // Prendi l'ultimo workout aggiunto (quello appena creato)
+    const createdWorkout = customer.workoutPlans[customer.workoutPlans.length - 1];
+
+    res.status(201).json(createdWorkout); // Ritorna l'oggetto completo con _id
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -50,10 +47,15 @@ export const addDay = async (req, res) => {
       return res.status(404).json({ message: "Scheda non trovata" });
     }
 
-    workoutPlan.days.push({ name });
+    // Crea il nuovo giorno
+    const newDay = { name, exercises: [] };
+    workoutPlan.days.push(newDay);
     await customer.save();
 
-    res.status(200).json({ message: "Giorno aggiunto con successo" });
+    // Prendi l'ultimo giorno aggiunto (quello appena creato)
+    const createdDay = workoutPlan.days[workoutPlan.days.length - 1];
+
+    res.status(200).json(createdDay); // Ritorna il day con _id
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -62,6 +64,7 @@ export const addDay = async (req, res) => {
 export const addExercise = async (req, res) => {
   try {
     const { userId, planId, dayId } = req.params;
+    const exerciseData = req.body;
 
     const customer = await Customer.findById(userId);
     if (!customer) {
@@ -78,13 +81,14 @@ export const addExercise = async (req, res) => {
       return res.status(404).json({ message: "Giorno non trovato" });
     }
 
-    workoutDay.exercises.push(req.body);
+    // Aggiungi l'esercizio
+    workoutDay.exercises.push(exerciseData);
     await customer.save();
 
-    res.status(201).json({
-      message: "Esercizio aggiunto con successo",
-      exercise: req.body,
-    });
+    // Prendi l'ultimo esercizio aggiunto (quello appena creato)
+    const createdExercise = workoutDay.exercises[workoutDay.exercises.length - 1];
+
+    res.status(201).json(createdExercise); // Ritorna l'esercizio con _id
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
