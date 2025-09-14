@@ -197,6 +197,7 @@ export const deleteDay = async (req, res) => {
 export const deleteExercise = async (req, res) => {
   try {
     const { userId, planId, dayId, exerciseId } = req.params;
+    
     const customer = await Customer.findById(userId);
     if (!customer) {
       return res.status(404).json({ message: "Utente non trovato" });
@@ -212,16 +213,13 @@ export const deleteExercise = async (req, res) => {
       return res.status(404).json({ message: "Giorno non trovato" });
     }
 
-    const exercise = day.exercises.id(exerciseId);
-    if (!exercise) {
-      return res.status(404).json({ message: "Esercizio non trovato" });
-    }
-
-    exercise.remove();
+    // CORREZIONE: Usa pull() invece di remove()
+    day.exercises.pull(exerciseId);
     await customer.save();
 
     res.status(200).json({ message: "Esercizio eliminato con successo" });
   } catch (error) {
+    console.error("Errore eliminazione esercizio:", error); // Aggiunto per debug
     res.status(500).json({ message: error.message });
   }
 };
